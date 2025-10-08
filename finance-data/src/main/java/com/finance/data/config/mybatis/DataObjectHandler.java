@@ -1,0 +1,42 @@
+package com.finance.data.config.mybatis;
+
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.finance.common.core.domain.model.LoginUser;
+import com.finance.common.utils.SecurityUtils;
+import org.apache.ibatis.reflection.MetaObject;
+
+import java.util.Date;
+
+/**
+ * @author Hollis
+ */
+public class DataObjectHandler implements MetaObjectHandler {
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        this.setFieldValByNameIfNull("createTime", new Date(), metaObject);
+        this.setFieldValByNameIfNull("updateTime", new Date(), metaObject);
+        this.setFieldValByNameIfNull("createBy", loginUser.getUsername(), metaObject);
+        this.setFieldValByNameIfNull("updateBy", loginUser.getUsername(), metaObject);
+        this.setFieldValByName("isDelete", 0, metaObject);
+    }
+
+    /**
+     * 当没有值的时候再设置属性，如果有值则不设置。主要是方便单元测试
+     * @param fieldName
+     * @param fieldVal
+     * @param metaObject
+     */
+    private void setFieldValByNameIfNull(String fieldName, Object fieldVal, MetaObject metaObject) {
+        if (metaObject.getValue(fieldName) == null) {
+            this.setFieldValByName(fieldName, fieldVal, metaObject);
+        }
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        this.setFieldValByNameIfNull("updateTime", new Date(), metaObject);
+        this.setFieldValByNameIfNull("updateBy", loginUser.getUsername(), metaObject);
+    }
+}
